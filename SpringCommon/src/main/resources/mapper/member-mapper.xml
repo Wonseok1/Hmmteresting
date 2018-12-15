@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.iot.common.dao.MemberDao">
+
+	<select id="count" resultType="int"><![CDATA[
+		select count(*) from member		
+	]]></select>
+	
+	<select id="getList" resultType="Member"><![CDATA[
+		select * from member
+	]]></select>
+
+	<select id="findById" parameterType="string" 
+				resultType="Member"><![CDATA[
+		select * from member where user_id = #{userId}
+	]]></select>
+	
+	<insert id="insert" parameterType="Member"><![CDATA[
+		insert into member (
+			user_id, name, password, salt, email, user_level, 
+			phone_number, nick_name, address
+		) 
+		values(
+			#{userId}, #{name}, #{password} , #{salt}, #{email}, 'NORMAL', 
+			#{phoneNumber}, #{nickName}, #{address}
+		)
+	]]></insert>
+
+	<update id="update" parameterType="Member"><![CDATA[
+		update member set 
+			email=#{email},
+			phone_number=#{phoneNumber}, 
+			nick_name=#{nickName},
+			address=#{address},
+			update_date = sysdate 
+		where user_id=#{userId} and password=#{password}
+	]]></update>
+	
+	<update id="changePassword" parameterType="map"><![CDATA[
+		update member set 
+			password=#{newPassword}
+		where user_id=#{userId} and password=#{oldPassword}
+	]]></update>
+	
+	<update id="updateByAdmin" parameterType="Member"><![CDATA[
+		update member set 
+			user_level=#{userLevel},
+			nick_name=#{nickName},
+			email=#{email},
+			phone_number=#{phoneNumber}, 
+			address=#{address},
+			update_date = sysdate 
+		where user_id=#{userId} 
+	]]></update>
+	
+	
+	<delete id="delete" parameterType="String"><![CDATA[
+		delete from member
+		where user_id = #{userId}
+	]]>
+	</delete>
+	
+	<select id="getPage" 	parameterType="map" 
+							resultType="Member"><![CDATA[
+		select * from(
+			SELECT ROW_NUMBER() OVER(ORDER BY REG_DATE DESC) AS SEQ,
+				USER_ID, NAME, NICK_NAME, EMAIL,PHONE_NUMBER, ADDRESS, REG_DATE, UPDATE_DATE
+			FROM MEMBER
+		)
+		where seq between #{start} and #{end}	
+	]]></select>
+	
+	<select id="search" 
+		parameterType="Search"
+		resultType="Member"><![CDATA[
+			select * from member
+			where ${category} like #{keyword}
+			order by reg_date desc
+		]]></select>
+	
+</mapper>
+
